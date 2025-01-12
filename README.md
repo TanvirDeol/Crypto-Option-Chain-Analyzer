@@ -4,6 +4,8 @@
 
 The Crypto Option Chain Analyzer is a web application that provides real-time option chain data and volatility comparisons for various cryptocurrencies. The application fetches data from multiple sources, including Binance and CoinGecko, and displays it in an interactive dashboard.
 
+<img src="screenshots/option_chain.png" alt="Option Chain" width="600" />
+
 ## Features ✨
 
 - Real-time option chain data for BTC, ETH, BNB, and more.
@@ -44,3 +46,14 @@ The Crypto Option Chain Analyzer is a web application that provides real-time op
 - `.env`: Environment variables (not included in the repository).
 - `.gitignore`: Specifies files and directories to be ignored by Git.
 - `README.md`: Project documentation.
+
+## Screenshots 🖼️
+### Option Chain 
+<img src="screenshots/option_chain.png" alt="Option Chain" width="600" />
+
+### Historical Implied Volatility
+<img src="screenshots/vol_analysis.png" alt="Option Chain" width="600" />
+
+### Historical Greeks
+<img src="screenshots/historical_greeks.png" alt="Option Chain" width="600" />
+
