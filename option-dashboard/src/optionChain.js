@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
+import { FixedSizeList as List } from 'react-window';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Box } from '@mui/material';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const OptionChain = () => {
   const [selected, setSelected] = useState("BTC");
+  const [selectedOptionSymbol, setSelectedOptionSymbol] = useState("");
   const [selectedExpiry, setSelectedExpiry] = useState();
   const [showColumnToggle, setShowColumnToggle] = useState(false);
   const [connected, setConnected] = useState(false);
@@ -57,9 +61,29 @@ const OptionChain = () => {
     { key: "v", label: "Vega", index: 19 } ,
     { key: "n", label: "No. of Trades", index: 11 } ,
   ];
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const openDialog = (optionSymbol) => {
+    setSelectedOptionSymbol(optionSymbol);
+    setIsDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+  };
+
+  const redirectToVolatilityChart = () => {
+    navigate(`/option-volatility-chart?option-symbol=${selectedOptionSymbol}`);
+  };
+
+  const redirectToGreeksChart = () => {
+    navigate(`/greeks-chart?option-symbol=${selectedOptionSymbol}`);
+  };
+
+
   const options = ["BTC", "ETH", "SOL", "XRP", "BNB"];
   
-
   const toggleColumnVisibility = (column) => {
     setVisibleColumns((prev) => ({ ...prev, [column]: !prev[column] }));
   };
@@ -76,7 +100,6 @@ const OptionChain = () => {
     ws.onmessage = (event) => {
       try{
         const newData = JSON.parse(event.data);
-        console.log(newData);
         setData(newData);
       }
       catch (e){
@@ -146,18 +169,36 @@ const OptionChain = () => {
             Toggle Columns
           </button>
           {showColumnToggle && (
-            <div className="absolute z-10 bg-slate-800 border border-slate-700 p-4 rounded shadow-lg">
-              {columns.map((col) => (
-                <label key={col.key} className="block">
-                  <input
-                    type="checkbox"
-                    checked={visibleColumns[col.key]}
-                    onChange={() => toggleColumnVisibility(col.key)}
-                    className="mr-2"
-                  />
-                  {col.label}
-                </label>
-              ))}
+            <div
+              className="absolute z-10 bg-slate-800 border border-slate-700 p-0 rounded shadow-lg"
+              style={{ maxHeight: '500px', overflowY: 'scroll', top: '100%', left: 0, right: 0 }}
+            >
+              <select
+                multiple
+                size="15" // Adjust the size to make the dropdown taller
+                value={Object.keys(visibleColumns).filter(key => visibleColumns[key])}
+                onChange={(e) => {
+                  const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+                  setVisibleColumns(prev => {
+                    const newVisibleColumns = { ...prev };
+                    Object.keys(newVisibleColumns).forEach(key => {
+                      newVisibleColumns[key] = selectedOptions.includes(key);
+                    });
+                    return newVisibleColumns;
+                  });
+                }}
+                className="w-full p-2 bg-slate-800 text-white border border-slate-700 rounded focus:outline-none"
+              >
+                {columns.map((col) => (
+                  <option
+                    key={col.key}
+                    value={col.key}
+                    className={`bg-slate-800 text-gray-200 ${visibleColumns[col.key] ? 'bg-slate-400' : ''}`}
+                  >
+                    {col.label}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
         </div>
@@ -173,6 +214,7 @@ const OptionChain = () => {
       </div>
 
       <h1 className="text-2xl font-bold text-center m-4">Calls</h1>
+      <div>
       <table className="table-auto border-collapse bg-slate-800 overflow-hidden shadow-lg">
         <thead>
           <tr className="bg-slate-600 text-white">
@@ -210,8 +252,7 @@ const OptionChain = () => {
                       }
                       onClick={() => {
                         navigator.clipboard.writeText(row[1]);
-                        console.log(row[1]);
-                        alert('Copied');
+                        openDialog(row[1]);
                       }}
                     >
                       {row[col.index]}
@@ -222,6 +263,20 @@ const OptionChain = () => {
           ))}
         </tbody>
       </table>
+      </div>
+
+      <Dialog open={isDialogOpen} onClose={closeDialog} sx={{ '& .MuiPaper-root': { backgroundColor: '#1e293b', color: 'white', borderRadius: '10px', padding:'15px' } }}>
+        <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold' }}>Option Details</DialogTitle>
+        <DialogActions>
+          <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', padding: '5px 0' }}>
+            <Button sx={{ mb: 2, backgroundColor: '#1e40af', color: 'white', textTransform: 'none', '&:hover': { backgroundColor: '#172554' } }} onClick={() => {redirectToVolatilityChart()}}>View Historical Volatility</Button>
+            <Button sx={{ mb: 2, backgroundColor: '#1e40af', color: 'white', textTransform: 'none', '&:hover': { backgroundColor: '#172554' } }} onClick={() => {redirectToGreeksChart()}}>View Historical Greeks</Button>
+            <Button sx={{ backgroundColor: '#b91c1c', color: 'white',textTransform: 'none', '&:hover': { backgroundColor: '#7f1d1d' } }} onClick={closeDialog}>Cancel</Button>
+          </Box>
+        </DialogActions>
+      </Dialog>
+     
+
 
       <h1 className="text-2xl font-bold text-center m-4">Puts</h1>
       <table className="table-auto border-collapse bg-slate-800 overflow-hidden shadow-lg">
@@ -261,8 +316,7 @@ const OptionChain = () => {
                       }
                       onClick={() => {
                         navigator.clipboard.writeText(row[1]);
-                        console.log(row[1]);
-                        alert('Copied');
+                        openDialog(row[1]);
                       }}
                       >
                       {row[col.index]}
@@ -273,8 +327,10 @@ const OptionChain = () => {
           ))}
         </tbody>
       </table>
+
     </div>
   );
 };
 
 export default OptionChain;
+

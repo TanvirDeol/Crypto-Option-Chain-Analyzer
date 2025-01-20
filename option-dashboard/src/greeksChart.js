@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { useLocation } from 'react-router-dom';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const GreeksChart = () => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const optionSymbol = queryParams.get('option-symbol');
+
   const [symbol, setSymbol] = useState("");
   const [timeFrame, setTimeFrame] = useState("1");
   const [greek, setGreek] = useState("delta");
@@ -40,6 +45,12 @@ const GreeksChart = () => {
     console.log('Submitted symbol:', symbol);
   };
 
+  useEffect(() => {
+      if (optionSymbol) {
+        setSymbol(optionSymbol);
+      }
+    }, [optionSymbol]);
+
 
   const chartData = {
     labels: Array.from({ length: data.length }, (_, i) => `T-${i}`), // Simple timeline labels
@@ -48,8 +59,8 @@ const GreeksChart = () => {
         label: greek,
         data: data,
         borderColor: "rgb(35, 141, 187)",
-        backgroundColor: "rgba(75, 192, 192, 0.2)",
         fill: false,
+        pointStyle: false,
       },
     ],
   };
@@ -65,7 +76,7 @@ const GreeksChart = () => {
       y: {
         grid: {
           color: "gray", // Grid line color
-          lineWidth: 1,   // Grid line thickness
+          lineWidth: 0.5,   // Grid line thickness
         },
       },
     },

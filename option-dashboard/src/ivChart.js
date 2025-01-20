@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { useLocation } from 'react-router-dom';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const OptionVolatilityChart = () => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const optionSymbol = queryParams.get('option-symbol');
+
   const [symbol, setSymbol] = useState("");
   const [timeFrame, setTimeFrame] = useState("1");
   const [data, setData] = useState({ historical: [], implied: [] });
+  const [timestamps, setTimestamps] = useState([]);
+  const [displayTimestamps, setDisplayTimestamps] = useState([]);
 
   const fetchVolatilityData = async (symbol, timeframe) => {
     try {
@@ -18,14 +25,35 @@ const OptionVolatilityChart = () => {
       const result = await response.json();
       const historicalVolatility = result.historical_volatility.data.map(row => row[1]);
       const rdsData = result.rds_data.data.map(row => row[1]);
+      setTimestamps(result.historical_volatility.data.map(row => row[0]));
+      setDisplayTimestamps(processTimestamps(result.historical_volatility.data.map(row => row[0]), timeframe));
+
       const data = {
         historical: historicalVolatility,
         implied: rdsData
       };
+
       setData(data);
     } catch (error) {
       console.error("Failed to fetch volatility data:", error);
     }
+  };
+
+  const processTimestamps = (timestamps, timeframe) => {
+    timeframe = Number(timeframe);
+    return timestamps.map(timestamp => {
+      const date = new Date(timestamp);
+      if (timeframe < 7) {
+        // keep only hourly data
+        return date.toISOString().slice(11, 16); // 'HH:mm'
+      } else if (timeframe === 7) {
+        // keep day and hour data
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + date.toISOString().slice(11, 16); // 'MMM D HH:mm'
+      } else {
+        // keep only day data
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // 'MMM D'
+      }
+    });
   };
 
   const handleInputChange = (e) => {
@@ -40,12 +68,21 @@ const OptionVolatilityChart = () => {
 
   const handleSubmit = () => {
     fetchVolatilityData(symbol,timeFrame)
+    setDisplayTimestamps(processTimestamps(timestamps, timeFrame));
     console.log('Submitted symbol:', symbol);
   };
 
   useEffect(() => {
     fetchVolatilityData(symbol, timeFrame);
   }, []);
+
+  useEffect(() => {
+    if (optionSymbol) {
+      setSymbol(optionSymbol);
+    }
+  }, [optionSymbol]);
+
+
 
 
   const maxLength = Math.max(data.historical.length, data.implied.length);
@@ -58,28 +95,29 @@ const OptionVolatilityChart = () => {
   } else if (data.implied.length < maxLength) {
     data.implied = Array(lengthDifference).fill(0).concat(data.implied);
   }
-  const labels = Array.from({ length: maxLength }, (_, i) => `T-${maxLength - 1 - i}`);
+ 
   const chartData = {
-    labels: labels.slice(-data.historical.length),
+    labels: displayTimestamps,
     datasets: [
       {
         label: "Historical Volatility",
         data: data.historical,
         borderColor: "rgb(35, 141, 187)",
-        backgroundColor: "rgba(75, 192, 192, 0.2)",
         fill: false,
+        pointStyle: false,
       },
       {
         label: "Implied Volatility",
         data: data.implied,
         borderColor: "rgb(216, 50, 50)",
-        backgroundColor: "rgba(255, 99, 132, 0.2)",
         fill: false,
+        pointStyle: false,
       },
     ],
   };
 
   const chartOptions = {
+    // animation: false,
     scales: {
       x: {
         grid: {
@@ -90,7 +128,7 @@ const OptionVolatilityChart = () => {
       y: {
         grid: {
           color: "gray", // Grid line color
-          lineWidth: 1,   // Grid line thickness
+          lineWidth: 0.5,   // Grid line thickness
         },
       },
     },

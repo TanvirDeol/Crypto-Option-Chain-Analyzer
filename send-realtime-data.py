@@ -108,8 +108,8 @@ def volatility_comparison(option_symbol: str, timeframe: int):
         'columns': rds_df.columns.tolist(),
         'data': rds_df.values.tolist(),
     }
-    print(historical_volatility_data["data"])
-    print(rds_data["data"])
+    print("historical_vol: ", historical_volatility_data["data"][:5])
+    print("historical_implied_vol: ", rds_data["data"][:5])
     return {
         "historical_volatility": historical_volatility_data,
         "rds_data": rds_data
