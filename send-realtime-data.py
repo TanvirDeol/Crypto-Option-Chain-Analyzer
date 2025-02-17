@@ -1,12 +1,13 @@
-from fastapi import FastAPI, WebSocket
-from fastapi.middleware.cors import CORSMiddleware
-import pandas as pd
 import asyncio
 from typing import Optional
-import requests
-from iv_chart import volatility_comparison_data
-from greeks import greeks_data
 
+import pandas as pd
+import requests
+from fastapi import FastAPI, WebSocket
+from fastapi.middleware.cors import CORSMiddleware
+
+from greeks import greeks_data
+from iv_chart import volatility_comparison_data
 
 app = FastAPI()
 
@@ -20,11 +21,16 @@ app.add_middleware(
 )
 
 # load option chain data from file storage
-def get_option_chain(symbol,expiry):
+
+
+def get_option_chain(symbol, expiry):
     options_chain = pd.read_csv(f"option_chains/{symbol}_{expiry}_option_chain.csv")
     return options_chain
 
+
 # Fetch all unique (& active) symbols and their expiry dates from Binance
+
+
 def get_symbols_and_expiries():
     url = "https://eapi.binance.com/eapi/v1/mark"
     response = requests.get(url)
@@ -33,8 +39,8 @@ def get_symbols_and_expiries():
         symbols_and_expiries = {}
         for item in data:
             symbol = item["symbol"]
-            symbol_name = symbol.split('-')[0]
-            expiry_date = symbol.split('-')[1]
+            symbol_name = symbol.split("-")[0]
+            expiry_date = symbol.split("-")[1]
             if symbol_name in symbols_and_expiries:
                 symbols_and_expiries[symbol_name].add(expiry_date)
             else:
@@ -46,15 +52,18 @@ def get_symbols_and_expiries():
         print(f"Error fetching data: {response.status_code}")
         return {}
 
+
 # Send realtime option chain data to the client every 1 second
+
+
 async def send_dataframe_updates(websocket: WebSocket, symbol: str, expiry: str):
-    print(symbol,expiry)
+    print(symbol, expiry)
     while True:
         try:
             df = get_option_chain(symbol, expiry)
             data = {
-                'columns': df.columns.tolist(),
-                'data': df.values.tolist(),
+                "columns": df.columns.tolist(),
+                "data": df.values.tolist(),
             }
             await websocket.send_json(data)
             await asyncio.sleep(1)
@@ -62,9 +71,14 @@ async def send_dataframe_updates(websocket: WebSocket, symbol: str, expiry: str)
             print(f"Error: {e}")
             break
 
+
 # WebSocket endpoint to send realtime option chain data to client
+
+
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, symbol: Optional[str], expiry: Optional[str]):
+async def websocket_endpoint(
+    websocket: WebSocket, symbol: Optional[str], expiry: Optional[str]
+):
     await websocket.accept()
     if symbol:
         # if no expiry selected, choose the earliest expiry
@@ -77,43 +91,47 @@ async def websocket_endpoint(websocket: WebSocket, symbol: Optional[str], expiry
         await websocket.send_text("No symbol provided")
         await websocket.close()
 
+
 # Endpoint to fetch all unique (& active) symbols and their expiry dates
+
+
 @app.get("/symbols-expiries")
 def get_symbols_expiries():
     result = get_symbols_and_expiries()
     return result
 
+
 @app.get("/volatility-comparison")
 def volatility_comparison(option_symbol: str, timeframe: int):
     if not option_symbol:
         historical_volatility_data = {
-            'columns': [],
-            'data': [],
+            "columns": [],
+            "data": [],
         }
         rds_data = {
-            'columns': [],
-            'data': [],
+            "columns": [],
+            "data": [],
         }
         return {
             "historical_volatility": historical_volatility_data,
-            "rds_data": rds_data
+            "rds_data": rds_data,
         }
-    print("PARAMS: ",option_symbol, timeframe)
-    historical_volatility_df, rds_df = volatility_comparison_data(option_symbol, timeframe)
+    print("PARAMS: ", option_symbol, timeframe)
+    historical_volatility_df, rds_df = volatility_comparison_data(
+        option_symbol, timeframe
+    )
     historical_volatility_data = {
-        'columns': historical_volatility_df.columns.tolist(),
-        'data': historical_volatility_df.values.tolist(),
+        "columns": historical_volatility_df.columns.tolist(),
+        "data": historical_volatility_df.values.tolist(),
     }
     rds_data = {
-        'columns': rds_df.columns.tolist(),
-        'data': rds_df.values.tolist(),
+        "columns": rds_df.columns.tolist(),
+        "data": rds_df.values.tolist(),
     }
     print("historical_vol: ", historical_volatility_data["data"][:5])
     print("historical_implied_vol: ", rds_data["data"][:5])
-    return {
-        "historical_volatility": historical_volatility_data,
-        "rds_data": rds_data
-    }
+    return {"historical_volatility": historical_volatility_data, "rds_data": rds_data}
+
 
 @app.get("/greeks-data")
 def get_greeks_data(option_symbol: str, greek: str, timeframe: int):
@@ -124,7 +142,6 @@ def get_greeks_data(option_symbol: str, greek: str, timeframe: int):
         return result
     except Exception as e:
         return {"error": str(e)}
-
 
 
 # Run with: uvicorn send-realtime-data:app --reload

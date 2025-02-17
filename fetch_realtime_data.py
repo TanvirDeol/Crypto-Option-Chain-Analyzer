@@ -1,12 +1,13 @@
 import asyncio
-import websockets
-import pandas as pd
-import re
 import json
+import re
 import sys
 
+import pandas as pd
+import websockets
+
 # make it a 2d dictionary [symbol][expiry]
-option_chain = { 
+option_chain = {
     "BTC": {},
     "ETH": {},
     "SOL": {},
@@ -16,9 +17,11 @@ option_chain = {
 
 # obj_list : list of option data
 # symbol: cryptocurrency we are getting data for
-def process_data(obj_list,symbol,expiry):
+
+
+def process_data(obj_list, symbol, expiry):
     """
-    Update the global DataFrame with new rows from the provided list of objects, 
+    Update the global DataFrame with new rows from the provided list of objects,
     overwriting existing rows if they have the same "s" key value.
     Also extracts and appends strike price and option type as new columns.
 
@@ -30,14 +33,21 @@ def process_data(obj_list,symbol,expiry):
     """
     global option_chain
     new_data = pd.DataFrame(obj_list)
-    new_data['strike'], new_data['type'] = zip(*new_data['s'].apply(extract_strike_and_option))
+    new_data["strike"], new_data["type"] = zip(
+        *new_data["s"].apply(extract_strike_and_option)
+    )
     if expiry not in option_chain[symbol]:
         option_chain[symbol][expiry] = pd.DataFrame()
     if len(option_chain[symbol][expiry]) > 0:
-        # Remove rows in the global dataframe that have the same "s" key as the new data
-        option_chain[symbol][expiry] = option_chain[symbol][expiry][~option_chain[symbol][expiry]['s'].isin(new_data['s'])]
-    option_chain[symbol][expiry] = pd.concat([option_chain[symbol][expiry], new_data], ignore_index=True)
-    option_chain[symbol][expiry] = option_chain[symbol][expiry].sort_values(by='strike')
+        # Remove rows in the global dataframe that have the same "s" key as the
+        # new data
+        option_chain[symbol][expiry] = option_chain[symbol][expiry][
+            ~option_chain[symbol][expiry]["s"].isin(new_data["s"])
+        ]
+    option_chain[symbol][expiry] = pd.concat(
+        [option_chain[symbol][expiry], new_data], ignore_index=True
+    )
+    option_chain[symbol][expiry] = option_chain[symbol][expiry].sort_values(by="strike")
 
 
 def extract_strike_and_option(option_string):
@@ -62,16 +72,42 @@ async def binance_ws(url_param):
     url = f"wss://nbstream.binance.com/eoptions/stream?streams={url_param}"
     async with websockets.connect(url) as websocket:
         print("Connected to Binance WebSocket")
-        
+
         while True:
             data = await websocket.recv()
             data = json.loads(data)
             symbol = data["stream"][:3]
             expiry = data["stream"][-6:]
-            data = data['data']
-            process_data(data,symbol,expiry)
+            data = data["data"]
+            process_data(data, symbol, expiry)
             print(f"Collecting data for {symbol} @ {expiry}")
-            option_chain[symbol][expiry][['T','s','strike','type','o','h','l','c','V',"P",'p','n','bo','ao','b','a','d','t','g','v','vo','mp']].to_csv(f"option_chains/{symbol}_{expiry}_option_chain.csv",index=False)
+            option_chain[symbol][expiry][
+                [
+                    "T",
+                    "s",
+                    "strike",
+                    "type",
+                    "o",
+                    "h",
+                    "l",
+                    "c",
+                    "V",
+                    "P",
+                    "p",
+                    "n",
+                    "bo",
+                    "ao",
+                    "b",
+                    "a",
+                    "d",
+                    "t",
+                    "g",
+                    "v",
+                    "vo",
+                    "mp",
+                ]
+            ].to_csv(f"option_chains/{symbol}_{expiry}_option_chain.csv", index=False)
+
 
 if len(sys.argv) != 2:
     print("Usage: python fetch_realtime_data.py <param>")
