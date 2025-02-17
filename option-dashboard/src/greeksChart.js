@@ -1,23 +1,42 @@
-import React, { useState, useEffect } from "react";
-import { Line } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import React, { useState, useEffect } from 'react';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import { useLocation } from 'react-router-dom';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const GreeksChart = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const optionSymbol = queryParams.get('option-symbol');
 
-  const [symbol, setSymbol] = useState("");
-  const [timeFrame, setTimeFrame] = useState("1");
-  const [greek, setGreek] = useState("delta");
+  const [symbol, setSymbol] = useState('');
+  const [timeFrame, setTimeFrame] = useState('1');
+  const [greek, setGreek] = useState('delta');
   const [data, setData] = useState([]);
 
   const fetchGreeksData = async (symbol, greek, timeframe) => {
     try {
-      const response = await fetch(`http://localhost:8000/greeks-data?option_symbol=${symbol}&greek=${greek}&timeframe=${timeframe}`);
+      const response = await fetch(
+        `http://localhost:8000/greeks-data?option_symbol=${symbol}&greek=${greek}&timeframe=${timeframe}`
+      );
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
@@ -26,7 +45,7 @@ const GreeksChart = () => {
       console.log('Data:', data);
       setData(data);
     } catch (error) {
-      console.error("Failed to fetch greeks data:", error);
+      console.error('Failed to fetch greeks data:', error);
     }
   };
 
@@ -41,16 +60,15 @@ const GreeksChart = () => {
   };
 
   const handleSubmit = () => {
-    fetchGreeksData(symbol, greek,timeFrame)
+    fetchGreeksData(symbol, greek, timeFrame);
     console.log('Submitted symbol:', symbol);
   };
 
   useEffect(() => {
-      if (optionSymbol) {
-        setSymbol(optionSymbol);
-      }
-    }, [optionSymbol]);
-
+    if (optionSymbol) {
+      setSymbol(optionSymbol);
+    }
+  }, [optionSymbol]);
 
   const chartData = {
     labels: Array.from({ length: data.length }, (_, i) => `T-${i}`), // Simple timeline labels
@@ -58,56 +76,65 @@ const GreeksChart = () => {
       {
         label: greek,
         data: data,
-        borderColor: "rgb(35, 141, 187)",
+        borderColor: 'rgb(35, 141, 187)',
         fill: false,
         pointStyle: false,
       },
     ],
   };
-  
+
   const chartOptions = {
     scales: {
       x: {
         grid: {
-          color: "gray", // Grid line color
-          lineWidth: 0.2,   // Grid line thickness
+          color: 'gray', // Grid line color
+          lineWidth: 0.2, // Grid line thickness
         },
       },
       y: {
         grid: {
-          color: "gray", // Grid line color
-          lineWidth: 0.5,   // Grid line thickness
+          color: 'gray', // Grid line color
+          lineWidth: 0.5, // Grid line thickness
         },
       },
     },
   };
 
-
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-start mb-4 gap-4">
         <div>
-          <label htmlFor="symbol" className="block text-sm font-medium text-white mb-2">Option Symbol</label>
-          <div>
-          <input
-            type="text"
-            id="symbol"
-            value={symbol}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-            className="w-64 rounded-md bg-slate-800 text-gray-200 p-2 border border-gray-700 focus:ring-2 focus:ring-slate-500"
-            placeholder="Enter option symbol"
-          />
-          <button
-            onClick={handleSubmit}
-            className="ml-2 p-2 bg-blue-500 text-white rounded-md"
+          <label
+            htmlFor="symbol"
+            className="block text-sm font-medium text-white mb-2"
           >
-            Submit
-          </button>
-        </div>
+            Option Symbol
+          </label>
+          <div>
+            <input
+              type="text"
+              id="symbol"
+              value={symbol}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+              className="w-64 rounded-md bg-slate-800 text-gray-200 p-2 border border-gray-700 focus:ring-2 focus:ring-slate-500"
+              placeholder="Enter option symbol"
+            />
+            <button
+              onClick={handleSubmit}
+              className="ml-2 p-2 bg-blue-500 text-white rounded-md"
+            >
+              Submit
+            </button>
+          </div>
         </div>
         <div>
-          <label htmlFor="greek" className="block text-sm font-medium text-white mb-2">Greek Type</label>
+          <label
+            htmlFor="greek"
+            className="block text-sm font-medium text-white mb-2"
+          >
+            Greek Type
+          </label>
           <select
             id="greek"
             value={greek}
@@ -122,7 +149,12 @@ const GreeksChart = () => {
         </div>
 
         <div>
-          <label htmlFor="timeFrame" className="block text-sm font-medium text-white mb-2">Time Frame</label>
+          <label
+            htmlFor="timeFrame"
+            className="block text-sm font-medium text-white mb-2"
+          >
+            Time Frame
+          </label>
           <select
             id="timeFrame"
             value={timeFrame}
@@ -136,8 +168,6 @@ const GreeksChart = () => {
             <option value="90">90 Days</option>
           </select>
         </div>
-
-        
       </div>
 
       <div className="chart-container">
