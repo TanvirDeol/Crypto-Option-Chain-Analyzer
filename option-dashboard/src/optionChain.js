@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { FixedSizeList as List } from 'react-window';
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Button,
-  Box,
-} from '@mui/material';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Dialog, DialogActions, DialogTitle, Button, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const OptionChain = () => {
   const [selected, setSelected] = useState('BTC');
@@ -19,7 +9,6 @@ const OptionChain = () => {
   const [showColumnToggle, setShowColumnToggle] = useState(false);
   const [connected, setConnected] = useState(false);
   const [data, setData] = useState({ columns: [], data: [] });
-  const [error, setError] = useState(null);
   const [allExpiries, setAllExpiries] = useState({ BTC: [] });
   const [expiryDates, setExpiryDates] = useState([]);
   const [visibleColumns, setVisibleColumns] = useState({
@@ -91,9 +80,6 @@ const OptionChain = () => {
 
   const options = ['BTC', 'ETH', 'SOL', 'XRP', 'BNB'];
 
-  const toggleColumnVisibility = (column) => {
-    setVisibleColumns((prev) => ({ ...prev, [column]: !prev[column] }));
-  };
   const handleExpiryChange = (e) => setSelectedExpiry(e.target.value);
 
   useEffect(() => {
@@ -104,7 +90,6 @@ const OptionChain = () => {
     ws.onopen = () => {
       console.log('Connected to WebSocket');
       setConnected(true);
-      setError(null);
     };
     ws.onmessage = (event) => {
       try {
@@ -120,7 +105,6 @@ const OptionChain = () => {
     };
     ws.onerror = (error) => {
       console.error('WebSocket error:', error);
-      setError('Failed to connect to WebSocket server');
     };
     return () => {
       ws.close();

@@ -27,7 +27,7 @@ function ConditionalText() {
           Paste your option symbol and choose a timeframe from the dropdown
         </p>
         <p style={{ opacity: 0.5 }}>
-          Option symbols look like "BTC-250926-110000-C"
+          Option symbols look like &quot;BTC-250926-110000-C&quot;
         </p>
       </>
     );
@@ -45,7 +45,7 @@ function ConditionalText() {
           dropdowns
         </p>
         <p style={{ opacity: 0.5 }}>
-          Option symbols look like "BTC-250926-110000-C"
+          Option symbols look like &quot;BTC-250926-110000-C&quot;
         </p>
       </>
     );
