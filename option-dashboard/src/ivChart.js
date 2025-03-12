@@ -26,6 +26,7 @@ const OptionVolatilityChart = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const optionSymbol = queryParams.get('option-symbol');
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   const [symbol, setSymbol] = useState('');
   const [timeFrame, setTimeFrame] = useState('1');
@@ -36,7 +37,7 @@ const OptionVolatilityChart = () => {
   const fetchVolatilityData = async (symbol, timeframe) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/volatility-comparison?option_symbol=${symbol}&timeframe=${timeframe}`
+        `${apiUrl}/volatility-comparison?option_symbol=${symbol}&timeframe=${timeframe}`
       );
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);

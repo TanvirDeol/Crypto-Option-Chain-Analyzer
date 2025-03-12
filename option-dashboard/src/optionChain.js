@@ -3,6 +3,8 @@ import { Dialog, DialogActions, DialogTitle, Button, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const OptionChain = () => {
+  const apiUrl = process.env.REACT_APP_API_URL;
+  const wsUrl = process.env.REACT_APP_WS_URL;
   const [selected, setSelected] = useState('BTC');
   const [selectedOptionSymbol, setSelectedOptionSymbol] = useState('');
   const [selectedExpiry, setSelectedExpiry] = useState();
@@ -84,9 +86,8 @@ const OptionChain = () => {
 
   useEffect(() => {
     const ws = new WebSocket(
-      `ws://localhost:8000/ws?symbol=${selected}&expiry=${selectedExpiry}`
+      `${wsUrl}/ws?symbol=${selected}&expiry=${selectedExpiry}`
     );
-
     ws.onopen = () => {
       console.log('Connected to WebSocket');
       setConnected(true);
@@ -112,7 +113,7 @@ const OptionChain = () => {
   }, [selected, selectedExpiry]);
 
   useEffect(() => {
-    fetch('http://localhost:8000/symbols-expiries')
+    fetch(`${apiUrl}/symbols-expiries`)
       .then((response) => response.json())
       .then((expiryDict) => {
         setAllExpiries(expiryDict);

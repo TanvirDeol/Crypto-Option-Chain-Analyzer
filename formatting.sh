@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Usage: ./formatting.sh <filename_or_directory>
+# This script formats Python code using black and sorts imports using isort.
+# Provide the target file or directory as an argument to the script.
+
 # Check if a parameter is provided
 if [ -z "$1" ]; then
   echo "Usage: $0 <filename_or_directory>"
@@ -8,11 +12,8 @@ fi
 
 TARGET=$1
 
-# Apply autopep8 fixes
-autopep8 --in-place --aggressive --aggressive --recursive $TARGET
-
-# Apply black formatting
+# Apply formatting
 black $TARGET
 
-# Sort imports with isort
+# Sort imports
 isort $TARGET

@@ -26,6 +26,7 @@ const GreeksChart = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const optionSymbol = queryParams.get('option-symbol');
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   const [symbol, setSymbol] = useState('');
   const [timeFrame, setTimeFrame] = useState('1');
@@ -35,7 +36,7 @@ const GreeksChart = () => {
   const fetchGreeksData = async (symbol, greek, timeframe) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/greeks-data?option_symbol=${symbol}&greek=${greek}&timeframe=${timeframe}`
+        `${apiUrl}/greeks-data?option_symbol=${symbol}&greek=${greek}&timeframe=${timeframe}`
       );
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);

@@ -18,16 +18,18 @@ The Crypto Option Chain Analyzer is a web application that provides real-time op
 1. Clone the repository:
    ```bash
    git clone https://github.com/yourusername/option-pricing-dashboard.git
-   cd option-pricing-dashboard
 2. Install the dependencies:
    ```
+   cd option-dashboard
    npm install
+   cd ..
+   pip install -r requirements.txt
 3. Start real-time WebSocket connections:
    ```
    python orchestrate_data_collection.py
 4. Run the FastAPI backend:
    ```
-   uvicorn send-realtime-data:app --reload
+   uvicorn app:app --reload
 5. Start the development server:
    ```
    npm start
