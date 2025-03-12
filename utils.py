@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta, timezone
-import requests
+
 import pandas as pd
+import requests
 
 # DESCRIPTION:
-# This script contains general utility functions 
+# This script contains general utility functions
+
 
 # Given an option symbol, return the underlying trading pair
 # Example: BTC-210924-40000-C -> BTCUSDT
@@ -57,4 +59,3 @@ def get_symbols_and_expiries():
     else:
         print(f"Error fetching data: {response.status_code}")
         return {}
-    

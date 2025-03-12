@@ -10,6 +10,7 @@ client = Client()
 # This script gets the historical volatility (HV) of a stock for a given timeframe.
 # It fetches historical price data from Binance API and then calculates the rolling (30-day) historical volatility.
 
+
 # given a symbol, interval, and start date, fetch historical price data
 def get_historical_data(symbol, timeframe, start_str, end_str=None):
     interval = Client.KLINE_INTERVAL_1HOUR

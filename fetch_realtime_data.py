@@ -15,6 +15,7 @@ option_chain = {
     "BNB": {},
 }
 
+
 # obj_list : list of option data
 # symbol: cryptocurrency we are getting data for
 def process_data(obj_list, symbol, expiry):

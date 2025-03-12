@@ -5,9 +5,10 @@ from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
 from greeks import greeks_data
-from utils import get_option_chain, get_symbols_and_expiries, get_underlying_trading_pair, convert_to_utc
 from historical_volatility import get_historical_volatility
 from implied_volatility import get_implied_volatility
+from utils import (convert_to_utc, get_option_chain, get_symbols_and_expiries,
+                   get_underlying_trading_pair)
 
 app = FastAPI()
 
@@ -20,16 +21,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 def volatility_comparison_data(option_symbol, timeframe):
     underlying_symbol = get_underlying_trading_pair(option_symbol)
     start_date = convert_to_utc(timeframe)
     historical_volatility_df = get_historical_volatility(
         underlying_symbol, start_date, timeframe=timeframe
     )
-    implied_volatility_df = get_implied_volatility(
-        option_symbol, start_date, timeframe
-    )
+    implied_volatility_df = get_implied_volatility(option_symbol, start_date, timeframe)
     return historical_volatility_df, implied_volatility_df
+
 
 # Process locally stored option chains to send to websocket client
 async def send_dataframe_updates(websocket: WebSocket, symbol: str, expiry: str):
@@ -72,6 +73,7 @@ def get_symbols_expiries():
     result = get_symbols_and_expiries()
     return result
 
+
 # Returns historical volatility (HV) and historical implied volatility (IV) data for a given option symbol and timeframe
 # Usage: TODO
 @app.get("/volatility-comparison")
@@ -87,9 +89,7 @@ def volatility_comparison(option_symbol: str, timeframe: int):
                 "data": [],
             },
         }
-    hv_df, iv_df = volatility_comparison_data(
-        option_symbol, timeframe
-    )
+    hv_df, iv_df = volatility_comparison_data(option_symbol, timeframe)
     print(iv_df)
     hv_data = {
         "columns": hv_df.columns.tolist(),
@@ -100,6 +100,7 @@ def volatility_comparison(option_symbol: str, timeframe: int):
         "data": iv_df.values.tolist(),
     }
     return {"historical_volatility": hv_data, "rds_data": iv_data}
+
 
 # Returns options greeks (delta, gamma, theta, vega) data for a given option symbol and timeframe
 # Usage: TODO

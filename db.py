@@ -3,9 +3,11 @@ import os
 import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
+
 from utils import get_underlying_ticker
 
 load_dotenv()
+
 
 # columns is list of columns to fetch from the database
 def get_historical_db(option_symbol, columns, timeframe=1, start_date=None):
@@ -20,7 +22,7 @@ def get_historical_db(option_symbol, columns, timeframe=1, start_date=None):
         )
         print("Connection successful!")
         underlying = get_underlying_ticker(option_symbol)
-        if (start_date):
+        if start_date:
             query = f"""
                 SELECT * FROM {underlying}_options
                 WHERE symbol = '{option_symbol}'
@@ -32,7 +34,7 @@ def get_historical_db(option_symbol, columns, timeframe=1, start_date=None):
                 WHERE symbol = '{option_symbol}'
                 AND timestamp >= NOW() - INTERVAL {timeframe} DAY;
             """
-    
+
         data = pd.read_sql(query, engine)[columns]
         # Converts 10min data to hourly if timeframe is greater than 1
         if timeframe > 1:

@@ -6,11 +6,12 @@ import requests
 
 # DESCRIPTION:
 # This script gathers all active (currently trading) options from Binance
-# and starts concurrent processes to gather real-time option chain data for all active options. 
+# and starts concurrent processes to gather real-time option chain data for all active options.
 #
 # We currently support BTC, ETH, SOL, BNB, and XRP options.
 
 supported_tickers = ["BTC", "ETH", "SOL", "BNB", "XRP"]
+
 
 # Get all active options from Binance API
 def get_active_options():
@@ -23,6 +24,7 @@ def get_active_options():
     else:
         print(f"Error: {response.status_code}")
         return None
+
 
 # Given an option symbol, return the details like symbol, expiry date, strike price, and option type
 # Example: BTC-210924-40000-C -> {'symbol': 'BTC', 'expiry_date': '210924', 'strike_price': '40000', 'option_type': 'C'}
@@ -45,13 +47,16 @@ def extract_option_details(option_symbol):
     else:
         return None
 
+
 # Split a list into chunks of a specified size (chunk_size)
 def split_list(lst, chunk_size):
     return [lst[i : i + chunk_size] for i in range(0, len(lst), chunk_size)]
 
+
 # Format a list (of url params) into a string separated by '/'
 def format_list(input_list):
     return "/".join(sorted(input_list))
+
 
 # Execute the script to fetch real-time data for a given set of symbols and expiry dates
 # We run these scripts concurrently
