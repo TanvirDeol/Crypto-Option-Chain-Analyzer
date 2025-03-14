@@ -25,6 +25,7 @@ pydantic_core==2.27.2
 python-binance==1.0.28
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
+PyMySQL==1.1.1
 pytz==2025.1
 regex==2024.11.6
 requests==2.32.3
