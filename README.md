@@ -4,6 +4,8 @@
 
 The Crypto Option Chain Analyzer is a web application that provides real-time option chain data and volatility comparisons for various cryptocurrencies. The application fetches data from multiple sources, including Binance and CoinGecko, and displays it in an interactive dashboard.
 
+To see it live visit: [www.ivgreeks.com](https://www.ivgreeks.com)
+
 <img src="screenshots/option_chain.png" alt="Option Chain" width="600" />
 
 ## Features ✨
@@ -13,16 +15,16 @@ The Crypto Option Chain Analyzer is a web application that provides real-time op
 - Greeks data for options.
 - Copy option symbols to clipboard with a single click.
 
-## Installation 🛠️
+## Build Yourself 🛠️
+
+If you want to build your own version: 
 
 1. Clone the repository:
    ```bash
    git clone https://github.com/yourusername/option-pricing-dashboard.git
 2. Install the dependencies:
    ```
-   cd option-dashboard
-   npm install
-   cd ..
+   npm install (in option-dashboard)
    pip install -r requirements.txt
 3. Start real-time WebSocket connections:
    ```
@@ -42,12 +44,15 @@ The Crypto Option Chain Analyzer is a web application that provides real-time op
 
 ## Project Structure 📂
 - `src/`: Contains the frontend React code.
-- `send-realtime-data.py`: FastAPI backend for fetching and serving data.
-- `iv_chart.py`: Contains functions for fetching and calculating volatility data.
+- `app.py`: FastAPI backend.
+- `db.py`: Database functions
+- `fetch_realtime_data.py`: Fetch realtime websocket data
 - `greeks.py`: Contains functions for fetching Greeks data.
-- `.env`: Environment variables (not included in the repository).
-- `.gitignore`: Specifies files and directories to be ignored by Git.
-- `README.md`: Project documentation.
+- `historical_volatility.py`: Get historical volatility for an option
+- `implied_volatility.py`: Get implied volatility for an option
+- `iv_chart.py`: Contains functions for fetching and calculating volatility data.
+- `orchestrate_data_collection.py`: Orchestrate collecting data from multiple websocket streams
+- `utils.py`: Utility functions
 
 ## Screenshots 🖼️
 ### Option Chain 
